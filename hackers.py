@@ -32,7 +32,6 @@ def get_ips_as_list(data):
 def do_req(ip):
     req = urllib.request.urlopen("https://www.iplocate.io/api/lookup/"+ip)
     data = json.loads(req.read())
-
     return data
 
 
@@ -57,14 +56,15 @@ def get_top_ten_countries(countries):
     clist = countries
 
     for i in range(10):
-        maxc = countries[0]
+        maxc = clist[0]
 
         for c in clist:
             num = c["count"]
             if num > maxc["count"]:
                 maxc = c
-    tmp.append(maxc)
-    clist.pop(get_country_index(clist, c["country"]))
+        tmp.append(maxc)
+        clist[:] = [i for i in clist if i["country"] != maxc["country"]]
+
     return tmp
 
 
@@ -105,7 +105,17 @@ def create_pie(data):
     fig1, ax1 = plt.subplots()
     ax1.pie(counts, labels=labels, autopct='%1.1f%%')
     ax1.axis('equal')
+    save_chart(fig1, "hackpie.png")
     plt.show()
+
+
+def create_time_chart(data):
+    # save_chart(fig1, "hackbar.png")
+    ""
+
+
+def save_chart(fig, filename):
+    fig.savefig(filename, bbox_inches='tight')
 
 
 def main():
@@ -113,6 +123,7 @@ def main():
     f = open("logins.txt", "r")
     data = clean_data(f)
     create_pie(get_ip_data(data))
+    # create_time_chart(data)
 
 
 main()
