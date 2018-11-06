@@ -2,6 +2,8 @@ import urllib.request
 import json
 import time
 import matplotlib.pyplot as plt
+import numpy as np
+import math
 
 
 def clean_data(f):
@@ -13,7 +15,7 @@ def clean_data(f):
             "access type": line[9:22].strip(),
             "ip": line[22:39].strip(),
             "date": line[39:49].strip(),
-            "time interval": line[49:].strip(),
+            "time": line[49:].strip(),
         }
 
         if tmp["date"] == "Tue Oct  2":
@@ -106,12 +108,41 @@ def create_pie(data):
     ax1.pie(counts, labels=labels, autopct='%1.1f%%')
     ax1.axis('equal')
     save_chart(fig1, "hackpie.png")
-    plt.show()
+    # plt.show()
+
+
+def clean_data_time_string(s):
+    return s[:2]
+
+
+def get_attack_start_times(data):
+    tmp = []
+    for d in data:
+        tmp.append(int(clean_data_time_string(d["time"])))
+    return tmp
 
 
 def create_time_chart(data):
-    # save_chart(fig1, "hackbar.png")
-    ""
+    times = get_attack_start_times(data)
+
+    ar = np.arange(0, 24, 1)
+    tmp = list(range(0, 24))
+
+    for i in times:
+        tmp[i] += 1
+
+    fig = plt.figure()
+    width = 0.7
+
+    ax = fig.gca()
+    ax.bar(ar, tmp,  width)
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Attacks")
+    ax.set_title("Attacks on Weto server Tue Oct 2")
+    ax.set_xticks(ar)
+    ax.set_xticklabels(ar)
+    save_chart(fig, "hackbar.png")
+    # plt.show()
 
 
 def save_chart(fig, filename):
@@ -123,7 +154,7 @@ def main():
     f = open("logins.txt", "r")
     data = clean_data(f)
     create_pie(get_ip_data(data))
-    # create_time_chart(data)
+    create_time_chart(data)
 
 
 main()
